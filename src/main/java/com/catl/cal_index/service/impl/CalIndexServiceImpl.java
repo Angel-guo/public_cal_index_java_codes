@@ -405,8 +405,8 @@ public class CalIndexServiceImpl implements calIndexService {
         List<CarBatteryMap> batteryList = carBatteryMapMapper.getBatteryList();
         if(CollectionUtils.isEmpty(batteryList)){return new ArrayList<>();}
         // 拼接成对应的形式并返回
-        return batteryList.stream().map(obj->new CarBatteryVo(obj.getId(),obj.getBatteryModel(),
-                obj.getBatteryModel(),"SerchSelect")).collect(Collectors.toList());
+        return batteryList.stream().map(obj->new CarBatteryVo(obj.getId(),obj.getCap(),
+                obj.getCap(),"SerchSelect")).collect(Collectors.toList());
 
     }
 
@@ -415,8 +415,8 @@ public class CalIndexServiceImpl implements calIndexService {
         List<CarBatteryMap> batteryList = carBatteryMapMapper.getAutomobileEnterpriseByBattery(battery);
         if(CollectionUtils.isEmpty(batteryList)){return new ArrayList<>();}
         // 拼接成对应的形式并返回
-        return batteryList.stream().map(obj->new CarBatteryVo(obj.getId(),obj.getAutomobileEnterprise(),
-                obj.getAutomobileEnterprise(),"SerchSelect")).collect(Collectors.toList());
+        return batteryList.stream().map(obj->new CarBatteryVo(obj.getId(),obj.getCar(),
+                obj.getCar(),"SerchSelect")).collect(Collectors.toList());
     }
 
 }

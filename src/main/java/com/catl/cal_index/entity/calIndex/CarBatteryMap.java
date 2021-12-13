@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 //定义表名 --  指标计算不定参数
-@TableName(value = "car_battery_map")
+@TableName(value = "car_data_message")
 public class CarBatteryMap {
 
     //    定义主键名和自增方式
@@ -21,14 +21,17 @@ public class CarBatteryMap {
 
     @TableField(value = "automobile_enterprise")
     @ApiModelProperty(value = "汽车企业")
-    private String automobileEnterprise;
+    private String car;
 
     @TableField(value = "battery_model")
     @ApiModelProperty(value = "电池型号")
-    private String batteryModel;
+    private String cap;
 
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime createTime;
 
+    @TableField(fill = FieldFill.UPDATE)
+    @ApiModelProperty(value = "修改时间")
+    private LocalDateTime updateTime;
 }

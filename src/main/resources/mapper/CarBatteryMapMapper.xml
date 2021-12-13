@@ -3,16 +3,16 @@
 <mapper namespace="com.catl.cal_index.mapper.calIndex.CarBatteryMapMapper">
 
     <select id="getAutomobileEnterpriseByBattery" resultType="com.catl.cal_index.entity.calIndex.CarBatteryMap">
-        select id, automobile_enterprise
-        from car_battery_map
-        where battery_model = #{battery}
-        order by automobile_enterprise
+        select id, car
+        from car_data_message
+        where cap = #{battery}
+        order by car
     </select>
 
     <select id="getBatteryList" resultType="com.catl.cal_index.entity.calIndex.CarBatteryMap">
-        select  distinct battery_model
-        from car_battery_map
-        order by battery_model
+        select  distinct cap
+        from car_data_message
+        order by cap
     </select>
 
 </mapper>
