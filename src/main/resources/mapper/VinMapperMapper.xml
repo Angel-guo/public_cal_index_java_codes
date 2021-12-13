@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.catl.cal_index.mapper.calIndex.VinMapperMapper">
+    <select id="getVinOrMvinByVin" resultType="com.catl.cal_index.entity.calIndex.VinMapper">
+        select *
+        from vin_mapper
+        where vin=#{vin} or mvin =#{vin} limit 1
+    </select>
+</mapper>

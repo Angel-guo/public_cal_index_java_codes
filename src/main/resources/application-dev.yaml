@@ -1,0 +1,26 @@
+logging:
+  file:
+    name: ./logs/spr.log
+
+spring:
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+#      url: jdbc:mysql://10.35.197.128:3306/daiji?serverTimezone=Asia/Shanghai&characterEncoding=utf-8
+#      url: jdbc:mysql://localhost:3306/daiji?serverTimezone=Asia/Shanghai&characterEncoding=utf-8
+      url: jdbc:mysql://localhost:3306/cal_index?serverTimezone=Asia/Shanghai&characterEncoding=utf-8
+      username: root
+#      password: daiji123
+      password: root_1234
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+
+filePath: /Users/4paradigm/test/cal_index
+hdfsPath: /Users/4paradigm/test/cal_index

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.catl.cal_index.mapper.calIndex.CarBatteryMapMapper">
+
+    <select id="getAutomobileEnterpriseByBattery" resultType="com.catl.cal_index.entity.calIndex.CarBatteryMap">
+        select id, automobile_enterprise
+        from car_battery_map
+        where battery_model = #{battery}
+        order by automobile_enterprise
+    </select>
+
+    <select id="getBatteryList" resultType="com.catl.cal_index.entity.calIndex.CarBatteryMap">
+        select  distinct battery_model
+        from car_battery_map
+        order by battery_model
+    </select>
+
+</mapper>
