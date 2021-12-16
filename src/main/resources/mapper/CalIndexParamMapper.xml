@@ -5,10 +5,12 @@
         select *
         from cal_index_param
         where pid = -1
+        order by create_time
     </select>
     <select id="getAllSonParam" resultType="com.catl.cal_index.entity.calIndex.CalIndexParam">
         select *
         from cal_index_param
         where pid != -1
+        order by create_time
     </select>
 </mapper>

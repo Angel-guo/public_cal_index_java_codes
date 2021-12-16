@@ -24,3 +24,6 @@ mybatis-plus:
 
 filePath: /Users/4paradigm/test/cal_index
 hdfsPath: /Users/4paradigm/test/cal_index
+
+# set return data Number <= 300,000,000
+max_limit_number: 3000000

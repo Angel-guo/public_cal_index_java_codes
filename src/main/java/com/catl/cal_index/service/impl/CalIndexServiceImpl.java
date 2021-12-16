@@ -45,6 +45,8 @@ public class CalIndexServiceImpl implements calIndexService {
     private String FILE_PATH;
     @Value("${hdfsPath}")
     private String HDFS_PATH;
+    @Value("${max_limit_number}")
+    private String MAX_LIMIT_NUMBER;
 
     @Override
     public String getFileByCalIndex(String calIndex, List<ParamNameReq> params, Integer downloadStats) {
@@ -205,6 +207,202 @@ public class CalIndexServiceImpl implements calIndexService {
         return resultList;
     }
 
+//    @Override
+//    public CalIndexResultVo getCalIndexResultNumber(CalIndexReq calIndexReq) {
+//        CalIndexResultVo resultVo = new CalIndexResultVo();
+//        String calVarsString = calIndexReq.getParams().stream().map(ParamNameReq::getParamValue).collect(Collectors.joining("-"));
+//
+//        String fileName = "";
+//        // 判断是否要强制查询, 如果为
+//        if(calIndexReq.getDownloadStats() == 0){
+//            // 找到下载好的文件名
+//            CalIndexRecord taskStatusByCalIndex = calIndexRecordMapper.getTaskStatusByCalIndex(calIndexReq.getCalIndex(), calVarsString);
+//            fileName = taskStatusByCalIndex.getResult();
+//        }else{
+//            CalIndexRecord latestSuccessRecord = calIndexRecordMapper.getLatestSuccessRecord(calIndexReq.getCalIndex(), calVarsString);
+//            fileName = latestSuccessRecord.getResult();
+//        }
+//        logger.info("getCalIndexResultNumber, accept parameters: {}", JSONObject.toJSON(calIndexReq));
+//        logger.info("getCalIndexResultNumber, fileName: {}", fileName);
+//
+//        CalIndexType typeByCalIndex = calIndexTypeMapper.getTypeByCalIndex(calIndexReq.getCalIndex());
+//
+//        // 计算结果要展示的类型 Scatter 散点图，Pie 饼图；Line 折线图，Bar 柱状图
+//        resultVo.setResultType(typeByCalIndex.getResultType());
+//        // 计算结果内容 单车 SINGLE  多车 MULTI
+//        String carNumberType = typeByCalIndex.getCarNumberType();
+//        resultVo.setCarNumberType(carNumberType);
+//        // 多车也做数据展示，如果是数据量不超过5000
+//        logger.info(" getCalIndexResultNumber , resultVo:{} ", JSONObject.toJSON(resultVo));
+//
+//        // java 读取 csv 文件
+//        File file = new File(FILE_PATH + "/" + fileName + "/" + fileName);
+//        if (!file.exists()) {
+//            resultVo.setResultNum(-1); // 如果文件不存在，证明查询程序没有查处数据，需要重新查询
+//            logger.info("csv file is not exist!!!!!!");
+//            logger.info(" getCalIndexResultNumber , resultVo:{} ", JSONObject.toJSON(resultVo));
+//            return resultVo;
+//        }
+//
+//        File[] files = file.listFiles();
+//        if (null != files && files.length != 0) {
+//            for (File objFile : files) {
+//                if (objFile.getName().endsWith(".csv")) {
+//                    try {
+//                        // 统计csv 文件到底有多少行
+//                        LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(objFile));
+//                        lineNumberReader.skip(Long.MAX_VALUE); // 跳到最后
+//                        int lines = lineNumberReader.getLineNumber(); //实际上是读取换行符数量
+//                        resultVo.setResultNum(lines);
+//                        lineNumberReader.close();
+//                        logger.info(" count csv file line number：{} ", lines);
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//
+//                    // vin对应图表x轴，y轴数据
+//                    Map<String,ContentChartVo> vinToContentChartMap = new HashMap<>();
+//                    //小于等于5000行就进一步处理成前端要的数据模样 ,!=-1代表存在，<=5000 可以展示数据
+////                    if (resultVo.getResultNum() <= Long.MAX_VALUE && resultVo.getResultNum() != -1) {
+//                    if (resultVo.getResultNum() != -1) {
+//                        try {
+//                            // 如果是多车，把所有的vin读取出来，然后分组封装
+//                            InputStreamReader isr = new InputStreamReader(new FileInputStream(objFile), StandardCharsets.UTF_8);
+//                            BufferedReader br = new BufferedReader(isr);
+//                            String line = "";
+//
+//                            int RowCount = 0; // csv 行数
+//
+//                            int vinLocationColumn = 0; // vin 在数组的第几列,,经过 spark 处理后的csv默认第一列是vin
+//                            int carTypeColumn = 0; // 汽车类型所在列
+//                            int percentLocationColumn1 = 0; // 百分比在数组的第几列
+//                            // 百分比的数据列名，一般默认为 percent
+//                            String pieColumn = typeByCalIndex.getPieColumn();
+//
+//                            // 如果是折线图、散点图、柱状图等
+//                            int xLocationColumn = 0;  // x 轴数据所在列
+//                            int yLocationColumn = 0;  // y 轴数据所在列
+////                                int carTypeColumn2 = 0; // 汽车类型所在列
+//                            String xColumn = typeByCalIndex.getXColumn();
+//                            String yColumn = typeByCalIndex.getYColumn();
+//
+//                            while (line != null) {
+//                                ContentChartVo chartVo = new ContentChartVo();
+//
+//                                RowCount++;
+//                                line = br.readLine(); // line 逗号分割好的，如第一行表头 vin,datatime,temp_diff,car_type
+//                                if (null == line || line.length() == 0) {
+//                                    continue; // 跳过空行
+//                                }
+//                                // 对读取出来的一行进行逗号分割
+//                                String[] splitArray = line.split(",");
+//
+//                                if (typeByCalIndex.getResultType().equals("Pie")) { // 如果是饼图
+//                                    // 如果是首行
+////                                            String[] splitArray1 = line.split(",");
+//                                    for (int i = 0; i < splitArray.length && RowCount ==1; i++) {
+//                                        if (splitArray[i].equals(pieColumn)) {
+//                                            percentLocationColumn1 = i;
+//                                        }
+//                                        // csv 中 汽车类型定死的列名
+//                                        if ("car_type".equals(splitArray[i])) {
+//                                            carTypeColumn = i;
+//                                        }
+//                                        if("vin".equals(splitArray[i])){
+//                                            vinLocationColumn = i;
+//                                        }
+//
+//                                        logger.info("if Pie, percentLocationColumn1:{}, carTypeColumn:{}, vinLocationColumn:{}",
+//                                                percentLocationColumn1, carTypeColumn, vinLocationColumn);
+//                                    }
+//                                    if (RowCount != 1) { // 不写表头
+//                                        // 更新 map 中的 数据
+//                                        ContentChartVo contentChartVo = vinToContentChartMap.get(splitArray[vinLocationColumn]);
+//                                        if(null == contentChartVo){ // 第一次更新数据
+//                                            chartVo.setVin(splitArray[vinLocationColumn]);
+//                                            chartVo.setCarType(splitArray[carTypeColumn]);
+//                                            // 如果取到的数据为空，就置为0，如果不为空，就直接设置进去
+//                                            chartVo.setPercent(Double.parseDouble(
+//                                                    (null == splitArray[percentLocationColumn1] || "\"\"".equals(splitArray[percentLocationColumn1]))? "0":splitArray[percentLocationColumn1]));
+//                                            // 推送到 vin对应 contentChart的map 上
+//                                            vinToContentChartMap.put(splitArray[vinLocationColumn],chartVo);
+//                                        }
+//                                    }
+//                                } else {
+//                                    // 如果是首行
+//                                    for (int i = 0; i < splitArray.length && RowCount ==1; i++) {
+//                                        if (splitArray[i].equals(xColumn)) {
+//                                            xLocationColumn = i;
+//                                        }
+//                                        if (splitArray[i].equals(yColumn)) {
+//                                            yLocationColumn = i;
+//                                        }
+//                                        // csv 中 汽车类型定死的列名
+//                                        if ("car_type".equals(splitArray[i])) {
+//                                            carTypeColumn = i;
+//                                        }
+//                                        if("vin".equals(splitArray[i])){
+//                                            vinLocationColumn = i;
+//                                        }
+//                                        logger.info("if not Pie, xLocationColumn:{}, yLocationColumn:{}, carTypeColumn:{}， vinLocationColumn：{}",
+//                                                xLocationColumn, yLocationColumn, carTypeColumn, vinLocationColumn);
+//                                    }
+//                                    if (RowCount != 1) { // 不写表头
+//                                        // 更新 map 中的 数据
+//                                        ContentChartVo contentChartVo = vinToContentChartMap.get(splitArray[vinLocationColumn]);
+//                                        if(null == contentChartVo) { // 第一次添加数据
+//                                            chartVo.setVin(splitArray[vinLocationColumn]);
+//                                            // 添加汽车类型
+//                                            chartVo.setCarType(splitArray[carTypeColumn]);
+//
+//                                            // 添加x轴，y轴数据，组装成[[x1,y1],[x2,y2],[x3,y3]]这种形式
+//                                            ArrayList<Object> dataList = new ArrayList<>();
+//                                            dataList.add(splitArray[xLocationColumn]);
+//                                            // 如果取到的数据为空，就置为0，如果不为空，就直接设置进去
+//                                            dataList.add(((null == splitArray[yLocationColumn] || "\"\"".equals(splitArray[yLocationColumn]))? "0":splitArray[yLocationColumn]));
+//                                            // 添加数据
+//                                            List<List<Object>> dataPoint = new ArrayList<>();
+//                                            dataPoint.add(dataList);
+//                                            chartVo.setDataPoint(dataPoint);
+//
+//                                            // 推送到 vin对应 contentChart的map 上
+//                                            vinToContentChartMap.put(splitArray[vinLocationColumn],chartVo);
+//                                        }else if(splitArray[vinLocationColumn].equals(contentChartVo.getVin())){
+//                                            // 添加x轴，y轴数据，组装成[[x1,y1],[x2,y2],[x3,y3]]这种形式
+//                                            ArrayList<Object> dataList = new ArrayList<>();
+//                                            dataList.add(splitArray[xLocationColumn]);
+//                                            // 如果取到的数据为空，就置为0，如果不为空，就直接设置进去
+//                                            dataList.add(((null == splitArray[yLocationColumn] || "\"\"".equals(splitArray[yLocationColumn]))? "0":splitArray[yLocationColumn]));
+//                                            // 添加数据
+//                                            List<List<Object>> dataPoint = contentChartVo.getDataPoint();
+//                                            dataPoint.add(dataList);
+//                                            contentChartVo.setDataPoint(dataPoint);
+//
+//                                            // 推送到 vin对应 contentChart的map 上
+//                                            vinToContentChartMap.put(splitArray[vinLocationColumn],contentChartVo);
+//                                        }
+//                                    }
+//                                }
+//                            }
+//
+//                            // 将多车数据封装进vo中
+//                            List<ContentChartVo> contentChartVoList = new ArrayList<>();
+//                            vinToContentChartMap.forEach((key,value)-> contentChartVoList.add(value));
+//                            resultVo.setResultContentsList(contentChartVoList);
+////                            logger.info("resultContentsList:{}", JSONObject.toJSON(contentChartVoList));
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                            logger.info("get result number error: {}", e.getMessage());
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        // 所有都封装好了，最后再返回
+//        return resultVo;
+//    }
+
     @Override
     public CalIndexResultVo getCalIndexResultNumber(CalIndexReq calIndexReq) {
         CalIndexResultVo resultVo = new CalIndexResultVo();
@@ -247,7 +445,6 @@ public class CalIndexServiceImpl implements calIndexService {
             for (File objFile : files) {
                 if (objFile.getName().endsWith(".csv")) {
                     try {
-                        // 统计csv 文件到底有多少行
                         LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(objFile));
                         lineNumberReader.skip(Long.MAX_VALUE); // 跳到最后
                         int lines = lineNumberReader.getLineNumber(); //实际上是读取换行符数量
@@ -258,10 +455,9 @@ public class CalIndexServiceImpl implements calIndexService {
                         e.printStackTrace();
                     }
 
-                    // vin对应图表x轴，y轴数据
-                    Map<String,ContentChartVo> vinToContentChartMap = new HashMap<>();
+                    Map<String, List<String>> resultMap = new HashMap<>();
                     //小于等于5000行就进一步处理成前端要的数据模样 ,!=-1代表存在，<=5000 可以展示数据
-                    if (resultVo.getResultNum() <= 5000 && resultVo.getResultNum() != -1) {
+                    if (resultVo.getResultNum() <= Long.parseLong(MAX_LIMIT_NUMBER) && resultVo.getResultNum() != -1) {
                         try {
                             // 如果是多车，把所有的vin读取出来，然后分组封装
                             InputStreamReader isr = new InputStreamReader(new FileInputStream(objFile), StandardCharsets.UTF_8);
@@ -269,65 +465,27 @@ public class CalIndexServiceImpl implements calIndexService {
                             String line = "";
 
                             int RowCount = 0; // csv 行数
-
-                            int vinLocationColumn = 0; // vin 在数组的第几列,,经过 spark 处理后的csv默认第一列是vin
                             int carTypeColumn = 0; // 汽车类型所在列
-                            int percentLocationColumn1 = 0; // 百分比在数组的第几列
-                            // 百分比的数据列名，一般默认为 percent
-                            String pieColumn = typeByCalIndex.getPieColumn();
 
                             // 如果是折线图、散点图、柱状图等
                             int xLocationColumn = 0;  // x 轴数据所在列
                             int yLocationColumn = 0;  // y 轴数据所在列
-//                                int carTypeColumn2 = 0; // 汽车类型所在列
                             String xColumn = typeByCalIndex.getXColumn();
                             String yColumn = typeByCalIndex.getYColumn();
 
+                            ContentChartVo chartVo = new ContentChartVo();
                             while (line != null) {
-                                ContentChartVo chartVo = new ContentChartVo();
 
-                                RowCount++;
+                                RowCount++; // 代表 csv 行数
                                 line = br.readLine(); // line 逗号分割好的，如第一行表头 vin,datatime,temp_diff,car_type
                                 if (null == line || line.length() == 0) {
                                     continue; // 跳过空行
                                 }
                                 // 对读取出来的一行进行逗号分割
                                 String[] splitArray = line.split(",");
-
-                                if (typeByCalIndex.getResultType().equals("Pie")) { // 如果是饼图
-                                    // 如果是首行
-//                                            String[] splitArray1 = line.split(",");
-                                    for (int i = 0; i < splitArray.length && RowCount ==1; i++) {
-                                        if (splitArray[i].equals(pieColumn)) {
-                                            percentLocationColumn1 = i;
-                                        }
-                                        // csv 中 汽车类型定死的列名
-                                        if ("car_type".equals(splitArray[i])) {
-                                            carTypeColumn = i;
-                                        }
-                                        if("vin".equals(splitArray[i])){
-                                            vinLocationColumn = i;
-                                        }
-
-                                        logger.info("if Pie, percentLocationColumn1:{}, carTypeColumn:{}, vinLocationColumn:{}",
-                                                percentLocationColumn1, carTypeColumn, vinLocationColumn);
-                                    }
-                                    if (RowCount != 1) { // 不写表头
-                                        // 更新 map 中的 数据
-                                        ContentChartVo contentChartVo = vinToContentChartMap.get(splitArray[vinLocationColumn]);
-                                        if(null == contentChartVo){ // 第一次更新数据
-                                            chartVo.setVin(splitArray[vinLocationColumn]);
-                                            chartVo.setCarType(splitArray[carTypeColumn]);
-                                            // 如果取到的数据为空，就置为0，如果不为空，就直接设置进去
-                                            chartVo.setPercent(Double.parseDouble(
-                                                    (null == splitArray[percentLocationColumn1] || "\"\"".equals(splitArray[percentLocationColumn1]))? "0":splitArray[percentLocationColumn1]));
-                                            // 推送到 vin对应 contentChart的map 上
-                                            vinToContentChartMap.put(splitArray[vinLocationColumn],chartVo);
-                                        }
-                                    }
-                                } else {
-                                    // 如果是首行
-                                    for (int i = 0; i < splitArray.length && RowCount ==1; i++) {
+                                // 如果是首行
+                                if(RowCount == 1){
+                                    for (int i = 0; i < splitArray.length; i++) {
                                         if (splitArray[i].equals(xColumn)) {
                                             xLocationColumn = i;
                                         }
@@ -338,55 +496,41 @@ public class CalIndexServiceImpl implements calIndexService {
                                         if ("car_type".equals(splitArray[i])) {
                                             carTypeColumn = i;
                                         }
-                                        if("vin".equals(splitArray[i])){
-                                            vinLocationColumn = i;
-                                        }
-                                        logger.info("if not Pie, xLocationColumn:{}, yLocationColumn:{}, carTypeColumn:{}， vinLocationColumn：{}",
-                                                xLocationColumn, yLocationColumn, carTypeColumn, vinLocationColumn);
+                                        logger.info("if not Pie, xLocationColumn:{}, yLocationColumn:{}, carTypeColumn:{}",
+                                                xLocationColumn, yLocationColumn, carTypeColumn);
                                     }
-                                    if (RowCount != 1) { // 不写表头
-                                        // 更新 map 中的 数据
-                                        ContentChartVo contentChartVo = vinToContentChartMap.get(splitArray[vinLocationColumn]);
-                                        if(null == contentChartVo) { // 第一次添加数据
-                                            chartVo.setVin(splitArray[vinLocationColumn]);
-                                            // 添加汽车类型
-                                            chartVo.setCarType(splitArray[carTypeColumn]);
 
-                                            // 添加x轴，y轴数据，组装成[[x1,y1],[x2,y2],[x3,y3]]这种形式
-                                            ArrayList<Object> dataList = new ArrayList<>();
-                                            dataList.add(splitArray[xLocationColumn]);
-                                            // 如果取到的数据为空，就置为0，如果不为空，就直接设置进去
-                                            dataList.add(((null == splitArray[yLocationColumn] || "\"\"".equals(splitArray[yLocationColumn]))? "0":splitArray[yLocationColumn]));
-                                            // 添加数据
-                                            List<List<Object>> dataPoint = new ArrayList<>();
-                                            dataPoint.add(dataList);
-                                            chartVo.setDataPoint(dataPoint);
-
-                                            // 推送到 vin对应 contentChart的map 上
-                                            vinToContentChartMap.put(splitArray[vinLocationColumn],chartVo);
-                                        }else if(splitArray[vinLocationColumn].equals(contentChartVo.getVin())){
-                                            // 添加x轴，y轴数据，组装成[[x1,y1],[x2,y2],[x3,y3]]这种形式
-                                            ArrayList<Object> dataList = new ArrayList<>();
-                                            dataList.add(splitArray[xLocationColumn]);
-                                            // 如果取到的数据为空，就置为0，如果不为空，就直接设置进去
-                                            dataList.add(((null == splitArray[yLocationColumn] || "\"\"".equals(splitArray[yLocationColumn]))? "0":splitArray[yLocationColumn]));
-                                            // 添加数据
-                                            List<List<Object>> dataPoint = contentChartVo.getDataPoint();
-                                            dataPoint.add(dataList);
-                                            contentChartVo.setDataPoint(dataPoint);
-
-                                            // 推送到 vin对应 contentChart的map 上
-                                            vinToContentChartMap.put(splitArray[vinLocationColumn],contentChartVo);
-                                        }
-                                    }
+                                    // 添加汽车类型
+                                    chartVo.setCarType(splitArray[carTypeColumn]);
+                                    List<String> dataList1 = new ArrayList<>();
+                                    dataList1.add(splitArray[xLocationColumn]);
+                                    // 如果取到的数据为空，就置为0，如果不为空，就直接设置进去
+                                    dataList1.add(((null == splitArray[yLocationColumn] || "\"\"".equals(splitArray[yLocationColumn]))? "0":splitArray[yLocationColumn]));
+                                    resultMap.put(splitArray[xLocationColumn], dataList1);
+                                }
+                                if (RowCount != 1) { // 不写表头
+                                    // 添加x轴，y轴数据，组装成[[x1,y1],[x2,y2],[x3,y3]]这种形式
+                                    List<String> dataList2 = new ArrayList<>();
+                                    dataList2.add(splitArray[xLocationColumn]);
+                                    // 如果取到的数据为空，就置为0，如果不为空，就直接设置进去
+                                    dataList2.add(((null == splitArray[yLocationColumn] || "\"\"".equals(splitArray[yLocationColumn]))? "0":splitArray[yLocationColumn]));
+                                    resultMap.put(splitArray[xLocationColumn], dataList2);
                                 }
                             }
 
-                            // 将多车数据封装进vo中
-                            List<ContentChartVo> contentChartVoList = new ArrayList<>();
-                            vinToContentChartMap.forEach((key,value)-> contentChartVoList.add(value));
-                            resultVo.setResultContentsList(contentChartVoList);
-                            logger.info("resultContentsList:{}", JSONObject.toJSON(contentChartVoList));
+                            // 将 map 中的数据封装到 resultVo 中
+                            List<List<String>> resultDataPoint = chartVo.getDataPoint();
+                            resultMap.forEach((key,value)->{
+                                resultDataPoint.add(value);
+                            });
+                            chartVo.setDataPoint(resultDataPoint);
+                            chartVo.setDataNum(resultDataPoint.size());
+
+                            // 封装成 list， 方便前端取数据
+                            List<ContentChartVo> temp = new ArrayList<>();
+                            temp.add(chartVo);
+                            resultVo.setResultContentsList(temp);
+
                         } catch (IOException e) {
                             e.printStackTrace();
                             logger.info("get result number error: {}", e.getMessage());

@@ -18,7 +18,6 @@ public class  CalIndexResultVo {
     private Integer resultNum;
 
     @ApiModelProperty(value = "计算结果内容")
-//    private ContentChartVo resultContents; // 单车类型数据
     private List<ContentChartVo> resultContentsList; // 多车类型数据
 
     @ApiModelProperty(value = "计算结果内容 单车 SINGLE  多车 MULTI")
