@@ -28,5 +28,11 @@
         order by create_time desc limit 1
     </select>
 
-
+    <select id="getRecordListByCalIndex" resultType="com.catl.cal_index.entity.calIndex.CalIndexRecord">
+        select *
+        from cal_index_record
+        where cal_index = #{calIndex}
+                and status = 1
+        order by create_time
+    </select>
 </mapper>

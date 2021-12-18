@@ -62,4 +62,11 @@ public interface calIndexService {
      * @return
      */
     List<CarBatteryVo> getAutomobileEnterpriseByBattery(String battery);
+
+    /**
+     * 查询该指标所有的查询记录
+     * @param calIndex
+     * @return
+     */
+    String getRecordListByCalIndex(String calIndex, HttpServletResponse resp);
 }

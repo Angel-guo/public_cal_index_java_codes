@@ -5,6 +5,8 @@ import com.catl.cal_index.entity.calIndex.CalIndexRecord;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * <p>
  * Mapper 接口
@@ -40,4 +42,10 @@ public interface CalIndexRecordMapper extends BaseMapper<CalIndexRecord> {
      */
     CalIndexRecord getLatestRunningRecord(@Param("calIndex") String calIndex, @Param("calIndexVars") String calIndexVars);
 
+    /**
+     *  查询该指标的--历史记录, 并保存到 filePath路径下，相对路径为 /filPath/calIndexName.csv
+     * @param calIndex
+     * @return
+     */
+    List<CalIndexRecord> getRecordListByCalIndex(@Param("calIndex") String calIndex);
 }

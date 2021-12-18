@@ -108,4 +108,10 @@ public class CalIndexController {
         return calIndexRecordMapper.getLatestRunningRecord(calIndexReq.getCalIndex(), calVarsString);
     }
 
+    @GetMapping("/getRecordListByCalIndex")
+    @ApiOperation("查询该指标的--历史记录")
+    public String getRecordListByCalIndex(String calIndex, HttpServletResponse resp) {
+        return calIndexService.getRecordListByCalIndex(calIndex, resp);
+    }
+
 }
